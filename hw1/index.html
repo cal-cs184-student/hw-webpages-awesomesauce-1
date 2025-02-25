@@ -28,7 +28,7 @@
 	<body>
 		<div class="container">
 		<h1>CS184/284A Spring 2025 Homework 1 Write-Up</h1>
-		<div style="text-align: center;">Names: </div>
+		<div style="text-align: center;">Names:Arhaan Aggarwal, Eshani Jha </div>
 
 		<br>
 
@@ -38,75 +38,298 @@
 
 		Link to GitHub repository: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
 
-		<figure>
-			<img src="lion.jpg" alt="Lion" style="width:50%"/>
-			<figcaption>You can add images with captions!</figcaption>
-		</figure>
-
 		<!--
 		We've already added one heading per task, to make your write-up as navigable when grading. Please fit your write-up within these sections!
 		-->
 
-		<h2>Overview</h2>
-		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
 
-		<h2>Task 1: Drawing Single-Color Triangles</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        <h2>Overview</h2>
+        For this assignment, we implemented a basic rasterization pipeline, including drawing single-color triangles,
+        antialiasing via supersampling, and transformations using affine matrices. This project helped solidify
+        our understanding of computer graphics fundamentals, especially in terms of rendering pipeline efficiency
+        and visual quality enhancement through antialiasing. It was particularly interesting how small
+        algorithmic tweaks, such as optimizing triangle rasterization or adjusting sampling rates,
+        significantly impact final image quality.
 
-		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
+        <h2>Task 1: Drawing Single-Color Triangles</h2>
+        To rasterize a triangle, we iterated over all pixels within its bounding box and checked whether each pixel’s center was inside the triangle using a point-in-triangle test. The test leveraged edge equations, where a point \( (x, y) \) is inside a triangle defined by vertices \( (x_0, y_0), (x_1, y_1), (x_2, y_2) \) if it satisfies:
+
+        \[
+        (x - x_0)(y_1 - y_0) - (y - y_0)(x_1 - x_0) > 0
+        \]
+
+        for all three edges consistently (all negative). Once a pixel was determined to be inside the triangle, it was filled with the triangle's color.
+
+        <h3>Efficiency Considerations</h3>
+        Since the algorithm only checks pixels within the bounding box of the triangle, it avoids unnecessary computations outside the relevant area.
+
+        <h3>Screenshots</h3>
+        <figure>
+            <img src="images/test4.png" width="400px" />
+            <figcaption>Rasterizing single-color triangles.</figcaption>
+        </figure>
+
+        <h2>Task 2: Antialiasing by Supersampling</h2>
+        Supersampling mitigates aliasing by subdividing each pixel into multiple subpixels, sampling them separately, and averaging the results.
+
+        <h3>Implementation</h3>
+        <ul>
+            <li>Modified the rasterization loop to iterate over subpixels within each pixel.</li>
+            <li>Checked subpixels using the same point-in-triangle test.</li>
+            <li>Averaged the colors of all subpixel samples for smoother results.</li>
+        </ul>
+
+        <h3>Comparison of Sample Rates</h3>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <tr>
+                    <td>
+                        <img src="images/sample1.png" width="400px" />
+                        <figcaption>Sample Rate 1</figcaption>
+                    </td>
+                    <td>
+                        <img src="images/sample4.png" width="400px" />
+                        <figcaption>Sample Rate 4</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <img src="images/sample16.png" width="400px" />
+                        <figcaption>Sample Rate 16</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        		<h2>Task 3: Transforms</h2>
+		For this task, we modified `svg/transforms/robot.svg` by making the cubeman wave and turning the robot blue. This was achieved by applying the following transformations:
+
+		<ul>
+			<li><b>Rotation</b>: Rotated the right arm around the shoulder joint to simulate a waving motion.</li>
+			<li><b>Color Change</b>: Changed body color to blue to differentiate.</li>
+		</ul>
+
+		<h3>Screenshots</h3>
+		<figure>
+			<img src="images/robot.png" width="400px"/>
+			<figcaption>Original Robot</figcaption>
+		</figure>
+		<figure>
+			<img src="images/myrobot.png" width="400px"/>
+			<figcaption>Modified Robot - Waving and Blue</figcaption>
+		</figure>
+
+			
+		<h2>Task 4: Barycentric coordinates</h2>
+		<h3>Explanation of Barycentric Coordinates</h3>
+        <p>Barycentric coordinates provide a way to describe a point’s position relative to a triangle’s three vertices. Instead of using standard (x, y) Cartesian coordinates, a point inside a triangle is represented as a weighted combination of the triangle's vertices:</p>
+        
+        <p>Given a triangle with vertices \( A(x_0, y_0) \), \( B(x_1, y_1) \), and \( C(x_2, y_2) \), any point \( P(x, y) \) inside or on the triangle can be represented as:</p>
+        
+        <p>\[ P = \alpha A + \beta B + \gamma C \]</p>
+        
+        <p>where:</p>
+        <ul>
+            <li>\( \alpha, \beta, \gamma \) are the barycentric coordinates.</li>
+            <li>\( \alpha + \beta + \gamma = 1 \) (sum must be 1).</li>
+            <li>Each weight determines how much influence a vertex has on the point’s final color.</li>
+        </ul>
+
+        <h3>Implementation</h3>
+        <p>In our function <code>rasterize_interpolated_color_triangle</code>, we used barycentric coordinates to interpolate colors across a triangle.</p>
+
+        <h4>Steps:</h4>
+        <ol>
+            <li><b>Compute Bounding Box:</b> Determine the smallest rectangle that encloses the triangle.</li>
+            <li><b>Iterate Through Pixels:</b> Loop through each pixel in the bounding box.</li>
+            <li><b>Compute Barycentric Coordinates:</b> Using the determinant method, calculate \( \alpha, \beta, \gamma \).</li>
+            <li><b>Check if Pixel is Inside the Triangle:</b> A pixel is inside if all barycentric coordinates are non-negative.</li>
+            <li><b>Interpolate Color:</b> The color at each pixel is calculated using \[ C(x, y) = \alpha C_A + \beta C_B + \gamma C_C \].</li>
+            <li><b>Render the Pixel:</b> Assign the interpolated color to the pixel.</li>
+        </ol>
+
+        <h3>Results</h3>
+		<p>The output  displays a color wheel.</p>
+        
+        <figure>
+            <img src="images/colorwheel.png" alt="Color Wheel" style="width:50%"/>
+            <figcaption>Rendered output of test7.svg.</figcaption>
+        </figure>
+
+		
+		<h2>Task 5: Pixel Sampling for Texture Mapping</h2>
+		<p>
+			Pixel sampling is the process of determining the color of a pixel by fetching a corresponding value from a texture. In texture mapping, a texture coordinate (u, v) is mapped onto a surface in world space, and pixel sampling is used to determine the appropriate color values.
+		</p>
+		<p>
+			We implemented two types of pixel sampling methods: nearest neighbor and bilinear interpolation. 
+			<ul>
+				<li><b>Nearest Neighbor Sampling:</b> This method selects the closest texel to the given (u, v) coordinate and assigns it as the pixel color. It is computationally efficient but can result in pixelated and blocky textures when the image is magnified.</li>
+				<li><b>Bilinear Interpolation:</b> This method takes the four closest texels and computes a weighted average based on the fractional part of the texture coordinates. This results in a smoother texture appearance but requires more computation.</li>
+			</ul>
+		</p>
+		<p>
+			We tested our implementation using the `svg/texmap/` directory files and captured the results using the 'S' hotkey as required. Below are the four comparisons:
+		</p>
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
 				<td style="text-align: center;">
-				  <img src="lion.jpg" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="images/nearest_1x.png" width="400px"/>
+				  <figcaption>Nearest Sampling - 1 sample per pixel</figcaption>
 				</td>
 				<td style="text-align: center;">
-				  <img src="lion.jpg" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="images/nearest_16x.png" width="400px"/>
+				  <figcaption>Nearest Sampling - 16 samples per pixel</figcaption>
 				</td>
 			  </tr>
 			  <tr>
 				<td style="text-align: center;">
-				  <img src="lion.jpg" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="images/bilinear_1x.png" width="400px"/>
+				  <figcaption>Bilinear Sampling - 1 sample per pixel</figcaption>
 				</td>
 				<td style="text-align: center;">
-				  <img src="lion.jpg" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="images/bilinear_16x.png" width="400px"/>
+				  <figcaption>Bilinear Sampling - 16 samples per pixel</figcaption>
 				</td>
 			  </tr>
 			</table>
 		</div>
+		<p>
+			<b>Observations:</b>
+			<ul>
+				<li>Nearest neighbor sampling at 1 sample per pixel results in noticeable blocky pixels.</li>
+				<li>Nearest neighbor sampling at 16 samples per pixel improves the quality but still lacks smooth transitions.</li>
+				<li>Bilinear interpolation significantly reduces pixelation, making textures look much smoother.</li>
+				<li>With 16 samples per pixel, bilinear interpolation achieves the highest quality with smooth texture transitions.</li>
+			</ul>
+		</p>
+		<p>
+			<b>When is the difference most noticeable?</b>
+			<ul>
+				<li>The difference between nearest and bilinear sampling is most noticeable when zooming in on textures or when dealing with diagonal edges.</li>
+				<li>Bilinear interpolation performs better when textures contain gradients, as it reduces the visual artifacts caused by aliasing.</li>
+				<li>Nearest neighbor sampling might be acceptable for pixel art but is undesirable for high-resolution texture mapping.</li>
+			</ul>
+		</p>
+		<p>
+			In conclusion, bilinear interpolation generally provides a much better visual result at the cost of slightly more computation, making it the preferred method for most texture mapping applications.
+		</p>
+		</div>
+
+		<h2>Task 6: Level Sampling with Mipmaps for Texture Mapping</h2>
+
+		<h3>Explanation of Level Sampling</h3>
+		<p>Level sampling is a <strong>texture mapping technique</strong> that determines which <strong>mipmap level</strong> to use based on the <strong>screen-space footprint</strong> of a texture. Instead of always sampling from the <strong>highest-resolution texture</strong>, we select an appropriate lower-resolution version when objects are further away, reducing <strong>aliasing artifacts</strong> like Moiré patterns.</p>
 		
-		<h2>Task 2: Antialiasing by Supersampling</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>Task 3: Transforms</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>Task 4: Barycentric coordinates</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>Task 5: "Pixel sampling" for texture mapping</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>Task 6: "Level Sampling" with mipmaps for texture mapping</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>(Optional) Task 7: Extra Credit - Draw Something Creative!</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>Additional Notes (please remove)</h2>
+		<p>Each <strong>mipmap level</strong> contains a <strong>downsampled</strong> version of the original texture:</p>
 		<ul>
-			<li>You can also add code if you'd like as so: <code>code code code</code></li>
-			<li>If you'd like to add math equations, 
-				<ul>
-					<li>You can write inline equations like so: \( a^2 + b^2 = c^2 \)</li>
-					<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
-				</ul>
-			</li>
+			<li><strong>Level 0</strong> → Full resolution (e.g., 512 x 512)</li>
+			<li><strong>Level 1</strong> → Half resolution (e.g., 256 x 256)</li>
+			<li><strong>Level 2</strong> → Quarter resolution (e.g., 128 x 128)</li>
+			<li>…</li>
+			<li><strong>Last Level</strong> → 1 x 1 texture</li>
 		</ul>
+		
+		<p>Using <strong>mipmaps</strong>, we improve <strong>rendering efficiency</strong> and <strong>reduce artifacts</strong> in textured surfaces.</p>
+		
+		<h3>Tradeoffs Between Speed, Memory, and Antialiasing</h3>
+		<table border="1" cellpadding="5" cellspacing="0">
+			<tr>
+				<th>Method</th>
+				<th>Speed</th>
+				<th>Memory Usage</th>
+				<th>Antialiasing Power</th>
+			</tr>
+			<tr>
+				<td><strong>P_NEAREST (Pixel Sampling)</strong></td>
+				<td>Fastest</td>
+				<td>Low</td>
+				<td>Poor (Blocky)</td>
+			</tr>
+			<tr>
+				<td><strong>P_LINEAR (Bilinear Filtering)</strong></td>
+				<td>Moderate</td>
+				<td>Low</td>
+				<td>Better (Smooth)</td>
+			</tr>
+			<tr>
+				<td><strong>L_ZERO (No Mipmap)</strong></td>
+				<td>Fast</td>
+				<td>High</td>
+				<td>Aliasing Issues</td>
+			</tr>
+			<tr>
+				<td><strong>L_NEAREST (Discrete Mipmap Selection)</strong></td>
+				<td>Moderate</td>
+				<td>Medium</td>
+				<td>Reduces Moire Patterns</td>
+			</tr>
+			<tr>
+				<td><strong>L_LINEAR </strong></td>
+				<td>Slowest</td>
+				<td>Low</td>
+				<td>Best</td>
+			</tr>
+		</table>
+		
+		<h3>Screenshots and Comparisons</h3>
+		<p>We tested <strong>four configurations</strong> using a custom <strong>PNG texture</strong>:</p>
+		<ul>
+			<li><strong>L_ZERO + P_NEAREST</strong> </li>
+			<li><strong>L_ZERO + P_LINEAR</strong> </li>
+			<li><strong>L_NEAREST + P_NEAREST</strong> </li>
+			<li><strong>L_NEAREST + P_LINEAR</strong> </li>
+		</ul>
+		
+		<div style="text-align: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+				<tr>
+					<td><img src="images/L_ZERO_P_NEAREST.png" width="400px"/><figcaption><strong>L_ZERO + P_NEAREST</strong></figcaption></td>
+					<td><img src="images/L_ZERO_P_LINEAR.png" width="400px"/><figcaption><strong>L_ZERO + P_LINEAR</strong></figcaption></td>
+				</tr>
+				<tr>
+					<td><img src="images/L_NEAREST_P_NEAREST.png" width="400px"/><figcaption><strong>L_NEAREST + P_NEAREST</strong></figcaption></td>
+					<td><img src="images/L_NEAREST_P_LINEAR.png" width="400px"/><figcaption><strong>L_NEAREST + P_LINEAR</strong></figcaption></td>
+				</tr>
+			</table>
+		</div>
+		
+		<h3>Extra Credit: Anisotropic Filtering</h3>
+		<p>Anisotropic filtering improves <strong>texture clarity</strong> at oblique angles by <strong>sampling multiple directions</strong> instead of a single mipmap level.</p>
+		
+		<h4>Why is Anisotropic Filtering Better?</h4>
+		<ul>
+			<li>Minimizes <strong>blurring</strong> and <strong>distortion</strong> when viewing textures at steep angles.</li>
+			<li>Significantly <strong>improves texture quality</strong> compared to trilinear filtering.</li>
+		</ul>
+
+		<div style="text-align: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+				<tr>
+					<td><img src="images/Anisotropic1.png" width="400px"/><figcaption><strong>Anisotropic + P_NEAREST</strong></figcaption></td>
+					<td><img src="images/Anisotropic2.png" width="400px"/><figcaption><strong>Anisotropic + P_LINEAR</strong></figcaption></td>
+				</tr>
+			</table>
+		</div>
+		
+		
+		<div style="text-align: center;">
+			<table border="1" cellpadding="5" cellspacing="0">
+				<tr>
+					<th>Method</th>
+					<th>Result</th>
+				</tr>
+				<tr>
+					<td><strong>Linear Filtering</strong></td>
+					<td>Blurry at extreme angles</td>
+				</tr>
+				<tr>
+					<td><strong>Anisotropic Filtering</strong></td>
+					<td><strong>Sharpest, clearest textures</strong></td>
+				</tr>
+			</table>
+		</div>
 		</div>
 	</body>
 </html>
