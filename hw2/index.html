@@ -1,4 +1,4 @@
-<html>
+a<html>
 	<head>
 		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
@@ -28,7 +28,7 @@
 	<body>
 		<div class="container">
 			<h1>CS184/284A Spring 2025 Homework 2 Write-Up</h1>
-			<div style="text-align: center;">Names: </div>
+			<div style="text-align: center;">Name: Eshani Jha</div>
 
 			<br>
 
@@ -40,7 +40,7 @@
 
 			<figure>
 				<img src="images/teapot.png" alt="Teapot" style="width:50%" />
-				<figcaption>You can add images with captions!</figcaption>
+				<figcaption>Teapot</figcaption>
 			</figure>
 
 			<!--
@@ -53,13 +53,11 @@
 			<h2>Section I: Bezier Curves and Surfaces</h2>
 
 			<h3>Part 1: Bezier curves with 1D de Casteljau subdivision</h3>
-			The De Casteljau Algorithm is a recursive method for evaluating points on a Bezier Curve, which is defined by a set of control points. The algorithm works by iteratively interpolating between these points using a parameter , which varies from 0 to 1. At each step, new points are computed as weighted averages of existing points, with the weight determined by . This process continues until only a single point remains, which lies on the Bezier curve.
+			The De Casteljau Algorithm is a recursive method for evaluating points on a Bezier Curve, which is defined by a set of control points. The algorithm works by iteratively interpolating between these points using a parameter t, which varies from 0 to 1. At each step, new points are computed as weighted averages of existing points, with the weight determined by t. This process continues until only a single point remains, which lies on the Bezier curve.
 
-			To implement this, I created a function that takes in a list of control points and a parameter . This function repeatedly applies linear interpolation to generate a sequence of intermediate points, gradually reducing the number of points until a single point is obtained. This final point represents the curve's position for the given parameter . The implementation was tested using a Bezier curve with six control points, and the results were visualized step by step. The progression of the algorithm shows how the control points are gradually refined into the final curve.
+			To implement this, I created a function that takes in a list of control points and a parameter t. This function repeatedly applies linear interpolation to generate a sequence of intermediate points, gradually reducing the number of points until a single point is obtained. This final point represents the curve's position for the given parameter . The implementation was tested using a Bezier curve with six control points, and the results were visualized step by step. The progression of the algorithm shows how the control points are gradually refined into the final curve.
 
-			Additionally, I modified the control points and adjusted the parameter  to observe how the shape of the Bezier curve changes. The algorithm effectively captures smooth transitions between points, demonstrating its utility in modeling curves with varying shapes.
-
-			<p>Here is an example 2x4 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
+			Additionally, I modified the control points and adjusted the parameter t to observe how the shape of the Bezier curve changes. The algorithm effectively captures smooth transitions between points, demonstrating its utility in modeling curves with varying shapes.
 
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
@@ -107,7 +105,7 @@
 
 			In my implementation, I first evaluated the Bezier surface along one axis, reducing the two-dimensional control grid to a single row of intermediate points. Then, I applied the De Casteljau Algorithm along the other axis to compute the final point on the surface. This approach ensures smooth surface interpolation by recursively refining the control points in both dimensions.
 
-			I tested my implementation using the <code>bez/teapot.bez</code> file, which represents a Bezier surface model of a teapot. The output successfully rendered the smooth surface, demonstrating the effectiveness of the algorithm in modeling complex geometries.
+			I tested my implementation using the <code>bez/teapot.bez</code> file, which represents a Bezier surface model of a teapot.
 
 			<figure>
 				<img src="images/p2_pot.png" alt="Teapot" style="width:500px" />
@@ -125,7 +123,7 @@
 
 			One important aspect of this implementation was ensuring that the vertex normal was correctly normalized at the end of the process. After summing the weighted face normals, I normalized the final result to ensure that the vertex normal had unit length. This step was necessary to maintain consistent shading results across the mesh.
 
-			To validate my implementation, I applied it to the teapot model and compared the results between flat shading and Phong shading. Without vertex normals, the shading appeared faceted due to abrupt changes in surface normals between adjacent faces. However, after incorporating area-weighted vertex normals, the shading became significantly smoother, demonstrating the effectiveness of this approach in achieving realistic rendering effects.
+			To validate my implementation, I applied it to the teapot model and compared the results between flat shading and Phong shading. Without vertex normals, the shading appeared faceted due to abrupt changes in surface normals between adjacent faces. However, after incorporating area-weighted vertex normals, the shading became significantly smoother.
 
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
